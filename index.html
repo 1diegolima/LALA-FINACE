@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Lala Finance — Open Finance Completo" />
+  <title>Lala Finance</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <!-- NOTIFICAÇÃO -->
+  <div id="notificacao" class="notificacao oculto" role="alert"></div>
+
+  <!-- MODAL TRANSAÇÃO (MANUAL) -->
+  <div id="modal-transacao" class="modal-overlay oculto">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2>Nova Transação</h2>
+        <button id="btn-fechar-modal" class="btn-icone">✕</button>
+      </div>
+      <form id="form-transacao">
+        <div class="campo"><label>Descrição</label><input id="t-descricao" type="text" required /></div>
+        <div class="campo"><label>Valor (R$)</label><input id="t-valor" type="number" step="0.01" required /></div>
+        <div class="campo"><label>Tipo</label>
+          <select id="t-tipo" required>
+            <option value="entrada">Entrada</option>
+            <option value="saida">Saída</option>
+            <option value="transferencia">Transferência</option>
+            <option value="deposito">Depósito</option>
+            <option value="pix">Pix</option>
+            <option value="divida">Dívida</option>
+            <option value="emprestimo">Empréstimo</option>
+          </select>
+        </div>
+        <div class="campo"><label>Banco</label><select id="t-banco" required><option value="Lala Finance">Lala Finance</option></select></div>
+        <div class="campo"><label>Data</label><input id="t-data" type="date" required /></div>
+        <div class="modal-acoes">
+          <button type="button" id="btn-cancelar-modal" class="btn btn-secundario">Cancelar</button>
+          <button type="submit" class="btn btn-primario">Adicionar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL CONSENTIMENTO OPEN FINANCE -->
+  <div id="modal-consentimento" class="modal-overlay oculto">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2>Conectar Banco</h2>
+        <button id="btn-fechar-consentimento" class="btn-icone">✕</button>
+      </div>
+      <div id="info-consentimento">
+        <p>Você está prestes a conectar um banco externo ao Lala Finance.</p>
+        <p>Dados que serão compartilhados:</p>
+        <ul>
+          <li>Nome e CPF</li>
+          <li>Saldo disponível</li>
+          <li>Histórico de Transações</li>
+          <li>Dados de salário/renda</li>
+        </ul>
+        <div class="campo">
+          <label style="display: flex; align-items: center; gap: 10px;">
+            <input type="checkbox" id="check-consentimento" required />
+            Aceito compartilhar meus dados
+          </label>
+        </div>
+      </div>
+      <div class="modal-acoes">
+        <button type="button" id="btn-cancelar-consentimento" class="btn btn-secundario">Cancelar</button>
+        <button type="button" id="btn-autorizar-conexao" class="btn btn-primario" disabled>Autorizar Conexão</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TELAS DE AUTH -->
+  <main id="tela-login" class="tela tela-auth ativa">
+    <div class="auth-container">
+      <div class="logo-area">
+        <div class="logo-icon">💚</div><h1 class="logo-nome">Lala Finance</h1>
+      </div>
+      <form id="form-login" class="card-auth">
+        <h2>Entrar</h2>
+        <div class="campo"><label>E-mail</label><input id="login-email" type="email" required /></div>
+        <div class="campo"><label>Senha</label><input id="login-senha" type="password" required /></div>
+        <button type="submit" id="btn-entrar" class="btn btn-primario btn-bloco">Entrar</button>
+        <div class="auth-links"><a href="#" id="link-cadastro">Criar conta</a></div>
+      </form>
+    </div>
+  </main>
+
+  <main id="tela-cadastro" class="tela tela-auth">
+    <div class="auth-container">
+      <div class="logo-area"><div class="logo-icon">💚</div><h1 class="logo-nome">Lala Finance</h1></div>
+      <form id="form-cadastro" class="card-auth">
+        <h2>Criar conta</h2>
+        <div class="campo"><label>Nome</label><input id="cad-nome" type="text" required /></div>
+        <div class="campo"><label>CPF</label><input id="cad-cpf" type="text" required /></div>
+        <div class="campo"><label>E-mail</label><input id="cad-email" type="email" required /></div>
+        <div class="campo"><label>Senha</label><input id="cad-senha" type="password" required /></div>
+        <button type="submit" class="btn btn-primario btn-bloco">Cadastrar</button>
+        <div class="auth-links"><a href="#" id="link-voltar-login">Já tenho conta</a></div>
+      </form>
+    </div>
+  </main>
+
+  <!-- APP PRINCIPAL -->
+  <div id="layout-app" class="layout-app oculto">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo">💚 Lala Finance</div>
+      <div class="sidebar-perfil">
+        <div class="avatar" id="sidebar-avatar">L</div>
+        <div class="sidebar-perfil-info"><span id="sidebar-nome">User</span><span class="sidebar-badge">Open Finance</span></div>
+      </div>
+      <nav>
+        <ul class="sidebar-nav">
+          <li><a href="#" class="nav-item ativa" data-tela="tela-dashboard">📊 Dashboard</a></li>
+          <li><a href="#" class="nav-item" data-tela="tela-operacoes">💸 Operações</a></li>
+          <li><a href="#" class="nav-item" data-tela="tela-bancos">🏦 Open Finance</a></li>
+          <li><a href="#" class="nav-item" data-tela="tela-transacoes">💳 Transações</a></li>
+          <li><a href="#" class="nav-item" data-tela="tela-relatorios">📈 Relatórios</a></li>
+          <li><a href="#" class="nav-item" data-tela="tela-configuracoes">⚙️ Perfil</a></li>
+        </ul>
+      </nav>
+      <div class="sidebar-footer"><button class="btn-logout" id="btn-logout-sidebar">🚪 Sair</button></div>
+    </aside>
+
+    <nav class="navbar-mobile">
+      <a href="#" class="nav-item-mobile ativa" data-tela="tela-dashboard">📊<br/>Dash</a>
+      <a href="#" class="nav-item-mobile" data-tela="tela-operacoes">💸<br/>Ações</a>
+      <a href="#" class="nav-item-mobile" data-tela="tela-bancos">🏦<br/>Bancos</a>
+      <a href="#" class="nav-item-mobile" data-tela="tela-transacoes">💳<br/>Trans</a>
+      <a href="#" class="nav-item-mobile" data-tela="tela-configuracoes">⚙️<br/>Perfil</a>
+    </nav>
+
+    <div class="conteudo-principal">
+      <header class="topbar"><span class="topbar-titulo" id="topbar-titulo">Dashboard</span><button class="btn-logout-mobile" id="btn-logout-topbar">🚪</button></header>
+
+      <!-- DASHBOARD -->
+      <section id="tela-dashboard" class="tela-interna ativa">
+        <div class="pagina-header">
+          <div><h2 id="saudacao">Olá 👋</h2><p id="data-hoje"></p></div>
+          <div class="saldo-total-container"><span class="saldo-total-label">Saldo Disponível</span><span class="saldo-total-valor" id="saldo-total">R$ 0,00</span></div>
+        </div>
+        <div class="cards-grid">
+          <article class="card card-verde"><div class="card-info"><span class="card-label">Receitas Mês</span><span class="card-valor" id="card-receitas">R$ 0,00</span></div></article>
+          <article class="card card-vermelho"><div class="card-info"><span class="card-label">Despesas Mês</span><span class="card-valor" id="card-despesas">R$ 0,00</span></div></article>
+          <article class="card card-roxo"><div class="card-info"><span class="card-label">Dívida Atual</span><span class="card-valor" id="card-divida">R$ 0,00</span></div></article>
+          <article class="card card-azul"><div class="card-info"><span class="card-label">Limite Disp.</span><span class="card-valor" id="card-limite">R$ 0,00</span></div></article>
+        </div>
+        
+        <div class="card-secao score-card" style="margin-bottom: 2rem;">
+          <h3>Score Financeiro</h3>
+          <div class="score-container">
+            <div class="score-bar"><div class="score-fill" id="score-fill" style="width: 0%;"></div></div>
+            <div class="score-texts"><span>0</span><span id="score-text-val" style="font-weight:bold; font-size: 1.2rem;">0</span><span>1000</span></div>
+          </div>
+        </div>
+
+        <div class="dashboard-inferior">
+          <div class="card-secao" style="flex:1"><h3>Ações Rápidas</h3><div class="acoes-grid">
+            <button class="btn btn-primario btn-bloco" onclick="mostrarTelaInterna('tela-operacoes')">Fazer Depósito / Pix</button>
+            <button class="btn btn-secundario btn-bloco" onclick="mostrarTelaInterna('tela-bancos')">Conectar Bancos</button>
+          </div></div>
+          <div class="card-secao" style="flex:2"><h3>Últimas Movimentações</h3><ul id="lista-transacoes-dashboard" class="lista-transacoes"></ul></div>
+        </div>
+      </section>
+
+      <!-- OPERAÇÕES -->
+      <section id="tela-operacoes" class="tela-interna">
+        <div class="pagina-header"><h2>Operações Financeiras</h2></div>
+        <div class="cards-grid">
+          <div class="card-secao">
+            <h3>Depósito</h3>
+            <form id="form-deposito">
+              <div class="campo"><label>Valor</label><input type="number" id="op-dep-valor" required/></div>
+              <button class="btn btn-primario">Realizar Depósito</button>
+            </form>
+          </div>
+          <div class="card-secao">
+            <h3>Pix (Transferência)</h3>
+            <form id="form-pix">
+              <div class="campo"><label>Chave / Destinatário</label><input type="text" required/></div>
+              <div class="campo"><label>Valor</label><input type="number" id="op-pix-valor" required/></div>
+              <button class="btn btn-primario">Enviar Pix</button>
+            </form>
+          </div>
+          <div class="card-secao">
+            <h3>Pagar Dívida</h3>
+            <form id="form-pagar-divida">
+              <div class="campo"><label>Valor a Pagar</label><input type="number" id="op-div-valor" required/></div>
+              <button class="btn btn-primario">Pagar Dívida</button>
+            </form>
+          </div>
+          <div class="card-secao">
+            <h3>Solicitar Empréstimo</h3>
+            <form id="form-emprestimo">
+              <div class="campo"><label>Valor Desejado</label><input type="number" id="op-emp-valor" required/></div>
+              <button class="btn btn-primario">Simular e Solicitar</button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- OPEN FINANCE / BANCOS -->
+      <section id="tela-bancos" class="tela-interna">
+        <div class="pagina-header"><h2>Open Finance</h2></div>
+        <div class="banner-open-finance">
+          <strong>Central Open Finance</strong>
+          <p>Conecte outros bancos, compartilhe histórico e faça portabilidade de salário.</p>
+        </div>
+        <div id="lista-bancos" class="bancos-grid"></div>
+        <div class="card-secao" style="margin-top:2rem;">
+          <h3>Portabilidade de Dados</h3>
+          <p>Traga seus dados e renda de um banco conectado.</p>
+          <button id="btn-importar-dados" class="btn btn-secundario">Importar Dados (Simulação)</button>
+        </div>
+      </section>
+
+      <!-- TRANSAÇÕES -->
+      <section id="tela-transacoes" class="tela-interna">
+        <div class="pagina-header">
+          <h2>Transações</h2>
+          <button class="btn btn-primario" id="btn-nova-transacao">Nova transação</button>
+        </div>
+        <div class="filtros-container">
+          <div class="campo campo-inline"><select id="filtro-tipo"><option value="">Todos</option><option value="entrada">Entrada</option><option value="saida">Saída</option><option value="pix">Pix</option><option value="deposito">Depósito</option></select></div>
+          <button class="btn btn-secundario" id="btn-filtrar">Filtrar</button>
+        </div>
+        <div class="card-secao"><ul id="lista-transacoes-principal" class="lista-transacoes"></ul></div>
+      </section>
+
+      <!-- RELATÓRIOS -->
+      <section id="tela-relatorios" class="tela-interna">
+        <div class="pagina-header"><h2>Relatórios</h2><input id="relatorio-mes" type="month" /></div>
+        <div class="cards-grid">
+          <article class="card"><div class="card-info"><span class="card-label">Entradas</span><span class="card-valor" id="rel-entradas">R$ 0,00</span></div></article>
+          <article class="card"><div class="card-info"><span class="card-label">Saídas</span><span class="card-valor" id="rel-saidas">R$ 0,00</span></div></article>
+          <article class="card"><div class="card-info"><span class="card-label">Saldo Mês</span><span class="card-valor" id="rel-saldo">R$ 0,00</span></div></article>
+        </div>
+        <div class="card-secao" style="margin-top:2rem;"><div id="grafico-relatorio" class="grafico-barras"></div></div>
+      </section>
+
+      <!-- CONFIGURAÇÕES -->
+      <section id="tela-configuracoes" class="tela-interna">
+        <div class="pagina-header"><h2>Perfil e Configurações</h2></div>
+        <div class="config-grid">
+          <div class="card-secao">
+            <h3>Dados Pessoais</h3>
+            <div class="perfil-avatar-area">
+              <div class="avatar avatar-grande" id="config-avatar">L</div>
+              <div><p id="config-nome" style="font-weight:bold;"></p><p id="config-email"></p><p id="config-cpf"></p><p id="config-renda">Renda Simulada: R$ 5.000,00</p></div>
+            </div>
+          </div>
+          <div class="card-secao card-sair">
+            <h3>Encerrar sessão</h3>
+            <button class="btn btn-perigo" id="btn-logout-config">🚪 Sair da conta</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script src="firebase-config.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
