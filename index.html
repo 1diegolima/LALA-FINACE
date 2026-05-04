@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Lala Finance — Open Finance Completo" />
   <title>Lala Finance</title>
-  <link rel="stylesheet" href="style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
 </head>
 <body>
@@ -77,12 +76,12 @@
   <main id="tela-login" class="tela tela-auth ativa">
     <div class="auth-container">
       <div class="logo-area">
-        <div class="logo-icon">💚</div><h1 class="logo-nome">Lala Finance</h1>
+        <img src="/logo.png" alt="Lala Finance Logo" class="logo-img" /><h1 class="logo-nome">Lala Finance</h1>
       </div>
       <form id="form-login" class="card-auth">
         <h2>Entrar</h2>
-        <div class="campo"><label>E-mail</label><input id="login-email" type="email" required /></div>
-        <div class="campo"><label>Senha</label><input id="login-senha" type="password" required /></div>
+        <div class="campo"><label>E-mail</label><input id="emailLogin" type="email" required /></div>
+        <div class="campo"><label>Senha</label><input id="senhaLogin" type="password" required /></div>
         <button type="submit" id="btn-entrar" class="btn btn-primario btn-bloco">Entrar</button>
         <div class="auth-links"><a href="#" id="link-cadastro">Criar conta</a></div>
       </form>
@@ -91,13 +90,14 @@
 
   <main id="tela-cadastro" class="tela tela-auth">
     <div class="auth-container">
-      <div class="logo-area"><div class="logo-icon">💚</div><h1 class="logo-nome">Lala Finance</h1></div>
+      <div class="logo-area"><img src="/logo.png" alt="Lala Finance Logo" class="logo-img" /><h1 class="logo-nome">Lala Finance</h1></div>
       <form id="form-cadastro" class="card-auth">
         <h2>Criar conta</h2>
-        <div class="campo"><label>Nome</label><input id="cad-nome" type="text" required /></div>
-        <div class="campo"><label>CPF</label><input id="cad-cpf" type="text" required /></div>
-        <div class="campo"><label>E-mail</label><input id="cad-email" type="email" required /></div>
-        <div class="campo"><label>Senha</label><input id="cad-senha" type="password" required /></div>
+        <div class="campo"><label>Nome</label><input id="nomeCadastro" type="text" required /></div>
+        <div class="campo"><label>CPF</label><input id="cpfCadastro" type="text" required /></div>
+        <div class="campo"><label>E-mail</label><input id="emailCadastro" type="email" required /></div>
+        <div class="campo"><label>Senha</label><input id="senhaCadastro" type="password" required /></div>
+        <div class="campo"><label>Confirmar Senha</label><input id="confirmarSenhaCadastro" type="password" required /></div>
         <button type="submit" class="btn btn-primario btn-bloco">Cadastrar</button>
         <div class="auth-links"><a href="#" id="link-voltar-login">Já tenho conta</a></div>
       </form>
@@ -107,7 +107,7 @@
   <!-- APP PRINCIPAL -->
   <div id="layout-app" class="layout-app oculto">
     <aside class="sidebar" id="sidebar">
-      <div class="sidebar-logo">💚 Lala Finance</div>
+      <div class="sidebar-logo"><img src="/logo.png" alt="Lala Finance Logo" class="logo-img-sidebar" /> Lala Finance</div>
       <div class="sidebar-perfil">
         <div class="avatar" id="sidebar-avatar">L</div>
         <div class="sidebar-perfil-info"><span id="sidebar-nome">User</span><span class="sidebar-badge">Open Finance</span></div>
@@ -160,7 +160,7 @@
         <div class="dashboard-inferior">
           <div class="card-secao" style="flex:1"><h3>Ações Rápidas</h3><div class="acoes-grid">
             <button class="btn btn-primario btn-bloco" onclick="mostrarTelaInterna('tela-operacoes')">Fazer Depósito / Pix</button>
-            <button class="btn btn-secundario btn-bloco" onclick="mostrarTelaInterna('tela-bancos')">Conectar Bancos</button>
+            <button class="btn btn-secundario btn-bloco" onclick="abrirConsentimento('banco-amigo')">Traga seus dados</button>
           </div></div>
           <div class="card-secao" style="flex:2"><h3>Últimas Movimentações</h3><ul id="lista-transacoes-dashboard" class="lista-transacoes"></ul></div>
         </div>
@@ -213,7 +213,7 @@
         <div class="card-secao" style="margin-top:2rem;">
           <h3>Portabilidade de Dados</h3>
           <p>Traga seus dados e renda de um banco conectado.</p>
-          <button id="btn-importar-dados" class="btn btn-secundario">Importar Dados (Simulação)</button>
+          <button id="btn-importar-dados" class="btn btn-secundario" onclick="abrirConsentimento('banco-amigo')">Traga seus dados</button>
         </div>
       </section>
 
@@ -259,9 +259,105 @@
         </div>
       </section>
     </div>
+    
+    <!-- MODAL CONSENTIMENTO OPEN FINANCE -->
+    <div id="modal-consentimento" class="modal-overlay oculto">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h2>Conexão Open Finance</h2>
+          <button id="btn-fechar-consentimento" class="btn btn-secundario">X</button>
+        </div>
+        <div class="modal-conteudo">
+          <p style="margin-bottom: 1rem;">Você está prestes a conectar sua conta do <strong>Banco Amigo</strong>. Os dados serão compartilhados de forma segura entre os bancos.</p>
+          <p style="margin-bottom: 1rem;">Os seguintes dados serão importados:</p>
+          <ul style="margin-bottom: 1.5rem; list-style: disc; padding-left: 1.5rem;">
+            <li>Nome</li>
+            <li>CPF</li>
+            <li>Saldo</li>
+            <li>Transações</li>
+          </ul>
+          <div class="campo">
+            <label style="display:flex; align-items:center; gap: 10px; cursor: pointer;">
+              <input type="checkbox" id="check-consentimento" style="width:auto; transform:scale(1.2);">
+              Eu autorizo o compartilhamento dos meus dados
+            </label>
+          </div>
+        </div>
+        <div class="modal-acoes">
+          <button id="btn-cancelar-consentimento" class="btn btn-secundario">Cancelar</button>
+          <button id="btn-autorizar-conexao" class="btn btn-primario" disabled>Autorizar conexão</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL TRANSAÇÃO -->
+    <div id="modal-transacao" class="modal-overlay oculto">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h2>Nova Transação Manual</h2>
+          <button id="btn-fechar-modal" class="btn btn-secundario">X</button>
+        </div>
+        <form id="form-transacao">
+          <div class="campo"><label>Valor</label><input type="number" id="t-valor" required/></div>
+          <div class="campo"><label>Tipo</label><select id="t-tipo" required><option value="entrada">Entrada Geral</option><option value="saida">Saída Geral</option></select></div>
+          <div class="campo"><label>Descrição</label><input type="text" id="t-descricao" required/></div>
+          <div class="campo"><label>Data</label><input type="date" id="t-data" required/></div>
+          <div class="campo"><label>Banco/Origem</label><input type="text" id="t-banco" value="Manual"/></div>
+          <div class="modal-acoes">
+            <button type="button" id="btn-cancelar-modal" class="btn btn-secundario">Cancelar</button>
+            <button type="submit" class="btn btn-primario">Salvar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- MODAL DETALHES DO BANCO EXTERNO (DASHBOARD CONSOLIDADO) -->
+    <div id="modal-detalhes-banco" class="modal-overlay oculto">
+      <div class="modal-box" style="max-width: 600px;">
+        <div class="modal-header">
+          <h2>Conexão atual</h2>
+          <button class="btn btn-secundario" onclick="window.fecharDetalhesBanco()">X</button>
+        </div>
+        <div class="modal-conteudo">
+          <div class="card-secao" style="margin-bottom: 1.5rem; border-left: 4px solid #1DB954; padding-left: 1rem;">
+            <h3 id="detalhes-banco-nome" style="color:#1DB954; font-size:1.4rem; margin-bottom: 0.2rem;">ConexBank</h3>
+            <p><strong style="color:#b3b3b3;">Status:</strong> <span style="color:#1DB954; font-weight: bold;">Conexão ativa</span></p>
+            <p style="margin-top: 0.5rem; font-size: 0.9rem; color: #a0a0a0; line-height: 1.4;">Mesma pessoa, bancos diferentes. A conexão usa os dados do parceiro para análise mútua.</p>
+          </div>
+          
+          <h3 style="margin-bottom: 0.8rem; font-size: 1.1rem; color: #fff;">Dados Consolidados</h3>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+            <div class="card-secao" style="padding: 1rem; text-align: center; background-color: #282828; border-radius: 8px;">
+              <p style="font-size: 0.85rem; color: #b3b3b3; margin-bottom: 0.3rem;">Salário Identificado</p>
+              <strong id="detalhes-banco-salario" style="font-size: 1.2rem; color: #1DB954;">---</strong>
+            </div>
+            <div class="card-secao" style="padding: 1rem; text-align: center; background-color: #282828; border-radius: 8px;">
+              <p style="font-size: 0.85rem; color: #b3b3b3; margin-bottom: 0.3rem;">Saldo Vinculado</p>
+              <strong id="detalhes-banco-saldo" style="font-size: 1.2rem; color: #fff;">---</strong>
+            </div>
+            <div class="card-secao" style="padding: 1rem; text-align: center; background-color: #282828; border-radius: 8px;">
+              <p style="font-size: 0.85rem; color: #b3b3b3; margin-bottom: 0.3rem;">Score Parceiro</p>
+              <strong id="detalhes-banco-score" style="font-size: 1.2rem; color: #fff;">---</strong>
+            </div>
+            <div class="card-secao" style="padding: 1rem; text-align: center; background-color: #282828; border-radius: 8px;">
+              <p style="font-size: 0.85rem; color: #b3b3b3; margin-bottom: 0.3rem;">Dívidas Ativas</p>
+              <strong id="detalhes-banco-divida" style="font-size: 1.2rem; color: #e22134;">---</strong>
+            </div>
+          </div>
+          
+        </div>
+        <div class="modal-acoes" style="justify-content: space-between;">
+          <button class="btn btn-perigo" onclick="window.desconectarBanco('banco-amigo')">Desconectar conta</button>
+          <div style="display:flex; gap:0.5rem;">
+            <button class="btn btn-primario" onclick="window.sincronizarBancoExterno()">Sincronizar Respostas</button>
+            <button class="btn btn-secundario" onclick="window.fecharDetalhesBanco()">Fechar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 
-  <script src="firebase-config.js"></script>
-  <script src="script.js"></script>
+  <script type="module" src="/src/main.js"></script>
 </body>
 </html>
