@@ -563,112 +563,79 @@ window.importarDadosDoBancoAmigo = async function(isSync = false) {
       if(btn) { btn.disabled = true; btn.textContent = 'Importando...'; }
     }
 
-    // ATENÇÃO:
-    // Este método usa acesso direto ao Firestore de outro projeto.
-    // Isso é apenas para simulação.
-    // FUTURA INTEGRAÇÃO: substituir por API real com autenticação.
-
-    const NOME_BANCO_AMIGO = "ConexBank";
+    // 1. FAZER A REQUISIÇÃO PARA A API
+    // Agora usando EMAIL em vez do UID para conseguir encontrar a conta lá no ConexBank
+    const urlAPI = `https://api-idlla4di2a-uc.a.run.app/shared-data/${usuarioAtual.email}`;
     
+    const resposta = await fetch(urlAPI);
+    const dadosDoAmigo = await resposta.json();
+
+    if (!resposta.ok) {
+         // Adicionando um prefixo para termos 100% de certeza de onde o erro vem
+         throw new Error("[Erro da API do Guilherme] " + (dadosDoAmigo.error || "Falha na comunicação"));
+    }
+
+    // Sanitizar os dados recebidos para evitar valores undefined no Firestore
+    const nomeDoBancoAmigo = dadosDoAmigo.bank_name || dadosDoAmigo.bankName || "ConexBank";
+    const titularConta = dadosDoAmigo.account_holder || dadosDoAmigo.accountHolder || usuarioAtual.email;
+    const scoreEstimado = dadosDoAmigo.credit_score_estimate || dadosDoAmigo.score || 0;
+    const saldoAmigo = dadosDoAmigo.balance || dadosDoAmigo.saldo || 0;
+
     // Evitar duplicação apenas se não for Sync
     if (!isSync) {
-      const qConn = query(collection(db, "connections"), where("userId", "==", usuarioAtual.uid), where("bankName", "==", NOME_BANCO_AMIGO));
-      const existConnSnap = await getDocs(qConn);
-      if (!existConnSnap.empty) {
-        mostrarMensagem("Conexão com este banco já existe.", "aviso");
-        document.getElementById('modal-consentimento').classList.add('oculto');
-        return;
+      try {
+        const qConn = query(collection(db, "connections"), where("userId", "==", usuarioAtual.uid), where("bankName", "==", nomeDoBancoAmigo));
+        const existConnSnap = await getDocs(qConn);
+        if (!existConnSnap.empty) {
+          mostrarMensagem("Conexão com este banco já existe.", "aviso");
+          document.getElementById('modal-consentimento').classList.add('oculto');
+          return;
+        }
+      } catch (err) {
+        throw new Error("[ERRO NA BUSCA GET] " + err.message);
       }
     }
 
-    // Aqui verificamos se o usuário é o mesmo nos dois bancos
-    const qAmigoUser = query(collection(dbAmigo, "users"), where("email", "==", usuarioAtual.email));
-    const amigoUsersSnap = await getDocs(qAmigoUser);
-    
-    if (amigoUsersSnap.empty) {
-      mostrarMensagem("Conta não encontrada no banco parceiro (email diferente ou inexistente).", "erro");
-      document.getElementById('modal-consentimento').classList.add('oculto');
-      return;
-    }
-    
-    const amigoUserData = amigoUsersSnap.docs[0].data();
-    const amigoUid = amigoUsersSnap.docs[0].id;
-    
-    const salarioParceiro = amigoUserData.rendaMensal || 0;
-    const scoreParceiro = amigoUserData.score || 0;
-    const dividaParceira = amigoUserData.divida || 0;
-
-    // Aqui importamos dados do banco externo filtrando apenas o usuário correspondente
-    // 1. Importar Saldo da coleção accounts do dbAmigo específica deste UID
-    const qAccountsAmigo = query(collection(dbAmigo, "accounts"), where("userId", "==", amigoUid));
-    const accountsAmigoSnap = await getDocs(qAccountsAmigo);
-    let saldoAmigo = 0;
-    
-    accountsAmigoSnap.forEach(doc => {
-      let s = doc.data().saldo;
-      if (typeof s === 'string') s = s.replace(/[^\d.,-]/g, '').replace(',', '.');
-      let p = parseFloat(s);
-      if(!isNaN(p)) saldoAmigo += p;
-    });
-
-    // 2. Salvar conexão no Lala Finance com metadados do Open Finance consolidado
-    await addDoc(collection(db, "connections"), {
-      userId: usuarioAtual.uid,
-      bankId: "banco-amigo",
-      bankName: NOME_BANCO_AMIGO,
-      status: "conectado",
-      consentimento: true,
-      sameUser: true,
-      email: usuarioAtual.email,
-      salarioParceiro: salarioParceiro,
-      scoreParceiro: scoreParceiro,
-      dividaParceira: dividaParceira,
-      connectedAt: serverTimestamp()
-    });
-
-    // 3. Salvar account externa no Lala Finance
-    await addDoc(collection(db, "accounts"), {
-      userId: usuarioAtual.uid,
-      bankId: "banco-amigo",
-      bankName: NOME_BANCO_AMIGO,
-      saldo: saldoAmigo,
-      tipo: "externo",
-      status: "Conectado",
-      createdAt: serverTimestamp()
-    });
-
-    // 4. Buscar e importar transações estritamente deste usuário
-    const qTransAmigo = query(collection(dbAmigo, "transactions"), where("userId", "==", amigoUid));
-    const transAmigoSnap = await getDocs(qTransAmigo);
-    
-    // Aqui exibimos os dados consolidados no Lala Finance (salvando localmente)
-    for (const d of transAmigoSnap.docs) {
-      const dados = d.data();
-      let v = dados.valor;
-      if(typeof v === 'string') v = parseFloat(v.replace(/[^\d.,-]/g, '').replace(',', '.'));
-      if(isNaN(v)) v = 0;
-      
-      await addDoc(collection(db, "transactions"), {
-        userId: usuarioAtual.uid,
-        descricao: dados.descricao || "Transação Externa",
-        valor: v,
-        tipo: dados.tipo || "entrada",
-        banco: NOME_BANCO_AMIGO,
-        origem: "externo",
-        data: dados.data || new Date().toISOString().slice(0, 10),
-        status: "Concluída",
-        createdAt: serverTimestamp()
+    try {
+      // 2. SALVAR OS DADOS NO SEU BANCO (Coleção connections)
+      await addDoc(collection(db, "connections"), {
+          userId: usuarioAtual.uid,
+          bankId: "banco-amigo",
+          bankName: nomeDoBancoAmigo,
+          status: "conectado",
+          consentimento: true,
+          email: titularConta,
+          scoreParceiro: scoreEstimado,
+          connectedAt: serverTimestamp()
       });
+    } catch (err) {
+      throw new Error("[ERRO AO SALVAR CONNECTION] " + err.message);
     }
 
-    // 5. Atualizar Saldo Total do Usuário no Lala Finance
-    let sAtual = parseFloat(dadosUsuario.saldo) || 0;
-    const novoSaldo = sAtual + saldoAmigo;
-    const novoScore = Math.min(1000, (parseFloat(dadosUsuario.score) || 0) + 50);
-    await updateDoc(doc(db, "users", usuarioAtual.uid), { saldo: novoSaldo, score: novoScore });
-    
-    dadosUsuario.saldo = novoSaldo;
-    dadosUsuario.score = novoScore;
+    try {
+      // 3. SALVAR NOVA CONTA (Coleção accounts)
+      await addDoc(collection(db, "accounts"), {
+          userId: usuarioAtual.uid,
+          bankId: "banco-amigo",
+          bankName: nomeDoBancoAmigo,
+          saldo: saldoAmigo,
+          tipo: "externo",
+          status: "Conectado",
+          createdAt: serverTimestamp()
+      });
+    } catch (err) {
+      throw new Error("[ERRO AO SALVAR ACCOUNT] " + err.message);
+    }
+
+    try {
+      // 4. ATUALIZAR O SALDO DO USUÁRIO (Coleção users)
+      let saldoAtual = parseFloat(dadosUsuario.saldo) || 0;
+      const novoSaldo = saldoAtual + saldoAmigo;
+      await updateDoc(doc(db, "users", usuarioAtual.uid), { saldo: novoSaldo });
+      dadosUsuario.saldo = novoSaldo;
+    } catch (err) {
+      throw new Error("[ERRO AO ATUALIZAR SALDO] " + err.message);
+    }
 
     if(!isSync) {
       mostrarMensagem("Dados importados com sucesso do Banco Amigo!");
@@ -682,11 +649,7 @@ window.importarDadosDoBancoAmigo = async function(isSync = false) {
 
   } catch (error) {
     console.error("Erro ao importar Open Finance:", error);
-    if (error.code === 'permission-denied') {
-      mostrarMensagem("Erro: O banco do seu amigo está bloqueado (Regras de Segurança do Firestore não permitem leitura pública).", "erro");
-    } else {
-      mostrarMensagem("Erro ao importar dados: " + error.message, "erro");
-    }
+    mostrarMensagem("Erro ao importar dados: " + error.message, "erro");
   } finally {
     if(!isSync) {
       const btn = document.getElementById('btn-autorizar-conexao');

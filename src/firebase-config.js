@@ -2,7 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
-// --- SEU FIREBASE (Lala Finance) ---
+// --- TE AMO LALA (Lala Finance) ---
 const firebaseConfig = {
   apiKey: "AIzaSyCbXDEs7YkGVV7FYQudC-tU3XbbXjsPBcE",
   authDomain: "lala-finance.firebaseapp.com",
@@ -17,7 +17,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// --- FIREBASE DO AMIGO (Banco Externo) ---
+// --- CONEXBANK (Banco Externo) ---
 const firebaseConfigAmigo = {
   apiKey: "AIzaSyAAbxmINIFuHP9tMlEnnBK62wfuNu0Q44A",
   authDomain: "appconexbank.firebaseapp.com",
